@@ -318,7 +318,9 @@ class Autocomplete extends Component {
       const newEditorState = addEntityToEditorState(editorState, item, match);
       this.resetMatch();
       onChange(newEditorState);
+      return true
     }
+    return false
   }
 
   onFocus(e) {
@@ -429,8 +431,9 @@ class Autocomplete extends Component {
     const { handleKeyCommand } = this.props;
 
     if (command === 'add-entity') {
-      this.addEntityWithSelectedSuggestion();
-      return 'handled';
+      if (this.addEntityWithSelectedSuggestion()) {
+        return 'handled';
+      }
     }
 
     return handleKeyCommand ? handleKeyCommand(command) : 'not-handled';
