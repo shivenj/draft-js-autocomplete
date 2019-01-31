@@ -4559,7 +4559,7 @@ var Autocomplete = function (_Component) {
           match = _state8.match;
 
 
-      if (focus && match && e.keyCode === 13) {
+      if (focus && match && match.suggestions.length > 0 && e.keyCode === 13) {
         return 'add-entity';
       }
 

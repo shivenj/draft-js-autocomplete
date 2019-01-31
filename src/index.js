@@ -420,7 +420,7 @@ class Autocomplete extends Component {
     const { keyBindingFn } = this.props;
     const { focus, match } = this.state;
 
-    if (focus && match && e.keyCode === 13) {
+    if (focus && match && match.suggestions.length > 0 && e.keyCode === 13) {
       return 'add-entity';
     }
 
