@@ -24,6 +24,7 @@ class Autocomplete extends Component {
     children: PropTypes.element.isRequired,
     onChange: PropTypes.func.isRequired,
     autocompletes: PropTypes.array,
+    additionalDecorators: PropTypes.array,
     onFocus: PropTypes.func,
     onBlur: PropTypes.func,
     onDownArrow: PropTypes.func,
@@ -35,7 +36,8 @@ class Autocomplete extends Component {
   };
 
   static defaultProps = {
-    autocompletes: []
+    autocompletes: [],
+    additionalDecorators: []
   };
 
   constructor(props) {
@@ -90,7 +92,7 @@ class Autocomplete extends Component {
    * @returns {CompositeDraftDecorator}
    */
   getDecorator() {
-    const { autocompletes } = this.props;
+    const { autocompletes, additionalDecorators } = this.props;
 
     const strategies = autocompletes.reduce((previous, autocomplete) => {
       const entityStrategy = {
@@ -105,7 +107,7 @@ class Autocomplete extends Component {
       };
       previous.push(entityStrategy, autocompleteStrategy);
       return previous;
-    }, []);
+    }, additionalDecorators);
 
     return new CompositeDecorator(strategies);
   }
@@ -245,7 +247,7 @@ class Autocomplete extends Component {
       onEscape: this.onEscape,
       onTab: this.onTab,
       keyBindingFn: this.keyBindingFn,
-      handleKeyCommand: this.handleKeyCommand      
+      handleKeyCommand: this.handleKeyCommand
     };
 
     return React.Children.map(
