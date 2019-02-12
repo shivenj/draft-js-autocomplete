@@ -4045,6 +4045,15 @@ var Autocomplete = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (Autocomplete.__proto__ || Object.getPrototypeOf(Autocomplete)).call(this, props));
 
+    _this.setEditorRef = function (el) {
+      if (el) {
+        _this.editor = el;
+        if (typeof _this.props.ref === 'function') {
+          _this.props.ref(el);
+        }
+      }
+    };
+
     _this.state = {
       focus: false, // Boolean to know if editor has focus or not
       matches: {}, // All matches found per content block and per autocomplete type
@@ -4094,15 +4103,15 @@ var Autocomplete = function (_Component) {
         this.updateMatch();
       }
     }
+  }, {
+    key: 'getDecorator',
+
 
     /**
      * Build decoration depending on autocompletes props
      *
      * @returns {CompositeDraftDecorator}
      */
-
-  }, {
-    key: 'getDecorator',
     value: function getDecorator() {
       var _this2 = this;
 
@@ -4334,7 +4343,8 @@ var Autocomplete = function (_Component) {
         onEscape: this.onEscape,
         onTab: this.onTab,
         keyBindingFn: this.keyBindingFn,
-        handleKeyCommand: this.handleKeyCommand
+        handleKeyCommand: this.handleKeyCommand,
+        ref: this.setEditorRef
       });
 
       return _react2.default.Children.map(children, function (child) {
@@ -4433,6 +4443,7 @@ var Autocomplete = function (_Component) {
         var newEditorState = (0, _utils.addEntityToEditorState)(editorState, item, match);
         this.resetMatch();
         onChange(newEditorState);
+        this.editor.focus();
         return true;
       }
       return false;
@@ -4610,7 +4621,8 @@ Autocomplete.propTypes = {
   onEscape: _propTypes2.default.func,
   onTab: _propTypes2.default.func,
   keyBindingFn: _propTypes2.default.func,
-  handleKeyCommand: _propTypes2.default.func
+  handleKeyCommand: _propTypes2.default.func,
+  ref: _propTypes2.default.func
 };
 Autocomplete.defaultProps = {
   autocompletes: [],

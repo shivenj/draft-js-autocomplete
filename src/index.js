@@ -32,7 +32,8 @@ class Autocomplete extends Component {
     onEscape: PropTypes.func,
     onTab: PropTypes.func,
     keyBindingFn: PropTypes.func,
-    handleKeyCommand: PropTypes.func
+    handleKeyCommand: PropTypes.func,
+    ref: PropTypes.func,
   };
 
   static defaultProps = {
@@ -83,6 +84,15 @@ class Autocomplete extends Component {
     // TODO: check for optimization
     if (prevProps.editorState !== this.props.editorState) {
       this.updateMatch();
+    }
+  }
+
+  setEditorRef = (el) => {
+    if (el) {
+      this.editor = el
+      if (typeof this.props.ref === 'function') {
+        this.props.ref(el)
+      }
     }
   }
 
@@ -247,7 +257,8 @@ class Autocomplete extends Component {
       onEscape: this.onEscape,
       onTab: this.onTab,
       keyBindingFn: this.keyBindingFn,
-      handleKeyCommand: this.handleKeyCommand
+      handleKeyCommand: this.handleKeyCommand,
+      ref: this.setEditorRef,
     };
 
     return React.Children.map(
@@ -318,6 +329,7 @@ class Autocomplete extends Component {
       const newEditorState = addEntityToEditorState(editorState, item, match);
       this.resetMatch();
       onChange(newEditorState);
+      this.editor.focus();
       return true
     }
     return false
