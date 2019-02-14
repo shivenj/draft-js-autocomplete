@@ -4387,7 +4387,9 @@ var Autocomplete = function (_Component) {
         };
         // Is this item selected
         var selected = selectedSuggestion === index;
-        return _react2.default.createElement(Item, { key: index, item: item, current: selected, onClick: onClick });
+        return _react2.default.createElement(Item, { key: index, item: item, selectSuggestion: function selectSuggestion() {
+            return _this4.setState({ selectedSuggestion: index });
+          }, current: selected, onClick: onClick });
       });
 
       return _react2.default.createElement(
