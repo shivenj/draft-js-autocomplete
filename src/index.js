@@ -291,7 +291,7 @@ class Autocomplete extends Component {
       };
       // Is this item selected
       const selected = selectedSuggestion === index;
-      return <Item key={index} item={item} current={selected} onClick={onClick}/>
+      return <Item key={index} item={item} selectSuggestion={() => this.setState({selectedSuggestion: index})} current={selected} onClick={onClick}/>
     });
 
     return <List display={focus} {...position}>{items}</List>;
