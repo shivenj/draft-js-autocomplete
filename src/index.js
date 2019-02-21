@@ -25,6 +25,7 @@ class Autocomplete extends Component {
     onChange: PropTypes.func.isRequired,
     autocompletes: PropTypes.array,
     additionalDecorators: PropTypes.array,
+    autocompleteFindWithRegex: PropTypes.func,
     onFocus: PropTypes.func,
     onBlur: PropTypes.func,
     onDownArrow: PropTypes.func,
@@ -156,7 +157,7 @@ class Autocomplete extends Component {
       const reg = new RegExp(String.raw({
         raw: `(${autocomplete.prefix})(\\S*)(\\s|$)` // eslint-disable-line no-useless-escape
       }), 'g');
-      const result = findWithRegex(reg, contentBlock, callback);
+      const result = typeof this.props.autocompleteFindWithRegex === 'function' ? this.props.autocompleteFindWithRegex(reg, contentBlock, callback) : findWithRegex(reg, contentBlock, callback);
       const { matches } = this.state;
       // Create autocompletes object if doesn't exists
       if (!matches[ contentBlock.getKey() ]) {
@@ -313,6 +314,7 @@ class Autocomplete extends Component {
     // Update resetMatch suggestions
     this.setState({
       match: null,
+      selectedSuggestion: 0,
       focus: true // Need to set focus state to true and onFocus doesn't seems to be called
     });
   }
