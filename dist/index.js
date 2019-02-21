@@ -4048,8 +4048,8 @@ var Autocomplete = function (_Component) {
     _this.setEditorRef = function (el) {
       if (el) {
         _this.editor = el;
-        if (typeof _this.props.ref === 'function') {
-          _this.props.ref(el);
+        if (typeof _this.props.setEditorRef === 'function') {
+          _this.props.setEditorRef(el);
         }
       }
     };
@@ -4626,7 +4626,7 @@ Autocomplete.propTypes = {
   onTab: _propTypes2.default.func,
   keyBindingFn: _propTypes2.default.func,
   handleKeyCommand: _propTypes2.default.func,
-  ref: _propTypes2.default.func
+  setEditorRef: _propTypes2.default.func
 };
 Autocomplete.defaultProps = {
   autocompletes: [],

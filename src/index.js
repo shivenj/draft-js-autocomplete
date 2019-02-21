@@ -34,7 +34,7 @@ class Autocomplete extends Component {
     onTab: PropTypes.func,
     keyBindingFn: PropTypes.func,
     handleKeyCommand: PropTypes.func,
-    ref: PropTypes.func,
+    setEditorRef: PropTypes.func,
   };
 
   static defaultProps = {
@@ -91,8 +91,8 @@ class Autocomplete extends Component {
   setEditorRef = (el) => {
     if (el) {
       this.editor = el
-      if (typeof this.props.ref === 'function') {
-        this.props.ref(el)
+      if (typeof this.props.setEditorRef === 'function') {
+        this.props.setEditorRef(el)
       }
     }
   }
