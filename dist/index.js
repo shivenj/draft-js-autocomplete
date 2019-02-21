@@ -4182,7 +4182,7 @@ var Autocomplete = function (_Component) {
         var reg = new RegExp(String.raw({
           raw: '(' + autocomplete.prefix + ')(\\S*)(\\s|$)' // eslint-disable-line no-useless-escape
         }), 'g');
-        var result = (0, _utils.findWithRegex)(reg, contentBlock, callback);
+        var result = typeof _this3.props.autocompleteFindWithRegex === 'function' ? _this3.props.autocompleteFindWithRegex(reg, contentBlock, callback) : (0, _utils.findWithRegex)(reg, contentBlock, callback);
         var matches = _this3.state.matches;
         // Create autocompletes object if doesn't exists
 
@@ -4421,6 +4421,7 @@ var Autocomplete = function (_Component) {
       // Update resetMatch suggestions
       this.setState({
         match: null,
+        selectedSuggestion: 0,
         focus: true // Need to set focus state to true and onFocus doesn't seems to be called
       });
     }
@@ -4616,6 +4617,7 @@ Autocomplete.propTypes = {
   onChange: _propTypes2.default.func.isRequired,
   autocompletes: _propTypes2.default.array,
   additionalDecorators: _propTypes2.default.array,
+  autocompleteFindWithRegex: _propTypes2.default.func,
   onFocus: _propTypes2.default.func,
   onBlur: _propTypes2.default.func,
   onDownArrow: _propTypes2.default.func,
