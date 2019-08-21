@@ -1,11 +1,13 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 
 import {
   EditorState,
   CompositeDecorator,
   getDefaultKeyBinding
-} from 'draft-js';
+} from "draft-js";
+
+import MultiDecorator from "draft-js-multidecorators";
 
 import {
   findWithRegex,
@@ -16,7 +18,7 @@ import {
   getSelectionPosition,
   isCurrentTextEmpty,
   isCurrentSelectionAnEntity
-} from './utils';
+} from "./utils";
 
 class Autocomplete extends Component {
   static propTypes = {
@@ -34,7 +36,7 @@ class Autocomplete extends Component {
     onTab: PropTypes.func,
     keyBindingFn: PropTypes.func,
     handleKeyCommand: PropTypes.func,
-    setEditorRef: PropTypes.func,
+    setEditorRef: PropTypes.func
   };
 
   static defaultProps = {
@@ -54,48 +56,58 @@ class Autocomplete extends Component {
 
     this.getDecorator = this.getDecorator.bind(this);
     this.createEntityStrategy = this.createEntityStrategy.bind(this);
-    this.createAutocompleteStrategy = this.createAutocompleteStrategy.bind(this);
+    this.createAutocompleteStrategy = this.createAutocompleteStrategy.bind(
+      this
+    );
     this.updateMatch = this.updateMatch.bind(this);
     this.resetMatch = this.resetMatch.bind(this);
     this.getChildren = this.getChildren.bind(this);
     this.buildSuggestionsList = this.buildSuggestionsList.bind(this);
     this.onSuggestionClick = this.onSuggestionClick.bind(this);
-    this.addEntityWithSelectedSuggestion = this.addEntityWithSelectedSuggestion.bind(this);
+    this.addEntityWithSelectedSuggestion = this.addEntityWithSelectedSuggestion.bind(
+      this
+    );
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
     this.onDownArrow = this.onDownArrow.bind(this);
     this.onUpArrow = this.onUpArrow.bind(this);
     this.onEscape = this.onEscape.bind(this);
     this.onTab = this.onTab.bind(this);
-    this.keyBindingFn= this.keyBindingFn.bind(this);
+    this.keyBindingFn = this.keyBindingFn.bind(this);
     this.handleKeyCommand = this.handleKeyCommand.bind(this);
+    this.myRef = React.createRef();
   }
 
   componentDidMount() {
     // When component mounted, we update editorState with our decorator
     const { editorState, onChange } = this.props;
-    const decorator = this.getDecorator();
+    const autoDecorator = this.getDecorator();
+    const restDecorator = this.props.decorator;
+    const decorator = new MultiDecorator([autoDecorator, restDecorator]);
     const newEditorState = EditorState.set(editorState, { decorator });
     // Call onChange to
     onChange(newEditorState);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevstate) {
     // Update match state if editorState change
     // TODO: check for optimization
     if (prevProps.editorState !== this.props.editorState) {
       this.updateMatch();
     }
-  }
-
-  setEditorRef = (el) => {
-    if (el) {
-      this.editor = el
-      if (typeof this.props.setEditorRef === 'function') {
-        this.props.setEditorRef(el)
-      }
+    if (prevstate.match !== this.state.match) {
+      this.setState({ selectedSuggestion: 0 });
     }
   }
+
+  setEditorRef = el => {
+    if (el) {
+      this.editor = el;
+      if (typeof this.props.setEditorRef === "function") {
+        this.props.setEditorRef(el);
+      }
+    }
+  };
 
   /**
    * Build decoration depending on autocompletes props
@@ -112,9 +124,7 @@ class Autocomplete extends Component {
       };
       const autocompleteStrategy = {
         strategy: this.createAutocompleteStrategy(autocomplete),
-        component: ({ children }) => (
-          <span>{children}</span>
-        )
+        component: ({ children }) => <span>{children}</span>
       };
       previous.push(entityStrategy, autocompleteStrategy);
       return previous;
@@ -132,18 +142,15 @@ class Autocomplete extends Component {
   createEntityStrategy(type) {
     return (contentBlock, callback, contentState) => {
       // Set entity for existing ones
-      contentBlock.findEntityRanges(
-        (character) => {
-          const entityKey = character.getEntity();
-          if (entityKey === null) {
-            return false;
-          }
-          // Return true if type are matching
-          return contentState.getEntity(entityKey).getType() === type;
-        },
-        callback
-      );
-    }
+      contentBlock.findEntityRanges(character => {
+        const entityKey = character.getEntity();
+        if (entityKey === null) {
+          return false;
+        }
+        // Return true if type are matching
+        return contentState.getEntity(entityKey).getType() === type;
+      }, callback);
+    };
   }
 
   /**
@@ -154,22 +161,28 @@ class Autocomplete extends Component {
    */
   createAutocompleteStrategy(autocomplete) {
     return (contentBlock, callback) => {
-      const reg = new RegExp(String.raw({
-        raw: `(${autocomplete.prefix})(\\S*)(\\s|$)` // eslint-disable-line no-useless-escape
-      }), 'g');
-      const result = typeof this.props.autocompleteFindWithRegex === 'function' ? this.props.autocompleteFindWithRegex(reg, contentBlock, callback) : findWithRegex(reg, contentBlock, callback);
+      const reg = new RegExp(
+        String.raw({
+          raw: `(${autocomplete.prefix})(\\S*)(\\s|$)` // eslint-disable-line no-useless-escape
+        }),
+        "g"
+      );
+      const result =
+        typeof this.props.autocompleteFindWithRegex === "function"
+          ? this.props.autocompleteFindWithRegex(reg, contentBlock, callback)
+          : findWithRegex(reg, contentBlock, callback);
       const { matches } = this.state;
       // Create autocompletes object if doesn't exists
-      if (!matches[ contentBlock.getKey() ]) {
-        matches[ contentBlock.getKey() ] = {};
+      if (!matches[contentBlock.getKey()]) {
+        matches[contentBlock.getKey()] = {};
       }
       // We override all matches for this block and this type
-      matches[ contentBlock.getKey() ][ autocomplete.type ] = result;
+      matches[contentBlock.getKey()][autocomplete.type] = result;
       // Update matches state
       this.setState({
         matches
-      })
-    }
+      });
+    };
   }
 
   /**
@@ -199,7 +212,10 @@ class Autocomplete extends Component {
     const suggestions = await getSuggestions(autocomplete, match);
 
     // Update position only if focus
-    let position = this.state.match && this.state.match.position ? this.state.match.position : null;
+    let position =
+      this.state.match && this.state.match.position
+        ? this.state.match.position
+        : null;
     if (focus) {
       position = getSelectionPosition();
     }
@@ -214,7 +230,8 @@ class Autocomplete extends Component {
 
     // Update selectedSuggestions if too high
     let { selectedSuggestion } = this.state;
-    const lastSuggestionIndex = suggestions.length > 0 ? suggestions.length - 1 : 0;
+    const lastSuggestionIndex =
+      suggestions.length > 0 ? suggestions.length - 1 : 0;
     if (selectedSuggestion > lastSuggestionIndex) {
       selectedSuggestion = lastSuggestionIndex;
     }
@@ -230,7 +247,7 @@ class Autocomplete extends Component {
     this.setState({
       match: null,
       selectedSuggestions: 0
-    })
+    });
   }
 
   /**
@@ -240,12 +257,7 @@ class Autocomplete extends Component {
    */
   getChildren() {
     // Remove all props we use and pass this others to DraftJS default Editor component
-    const {
-      editorState,
-      children,
-      onChange,
-      ...rest
-    } = this.props;
+    const { editorState, children, onChange, ...rest } = this.props;
 
     const childrenProps = {
       ...rest,
@@ -259,12 +271,11 @@ class Autocomplete extends Component {
       onTab: this.onTab,
       keyBindingFn: this.keyBindingFn,
       handleKeyCommand: this.handleKeyCommand,
-      ref: this.setEditorRef,
+      ref: this.setEditorRef
     };
 
-    return React.Children.map(
-      children,
-      child => React.cloneElement(child, childrenProps)
+    return React.Children.map(children, child =>
+      React.cloneElement(child, childrenProps)
     );
   }
 
@@ -284,7 +295,6 @@ class Autocomplete extends Component {
 
     const List = match.listComponent;
     const Item = match.itemComponent;
-
     const items = suggestions.map((item, index) => {
       // Create onClick callback for each item so we can pass params
       const onClick = () => {
@@ -292,10 +302,26 @@ class Autocomplete extends Component {
       };
       // Is this item selected
       const selected = selectedSuggestion === index;
-      return <Item key={index} item={item} selectSuggestion={() => this.setState({selectedSuggestion: index})} current={selected} onClick={onClick}/>
+      return (
+        <div ref={index}>
+          <Item
+            key={index}
+            item={item}
+            selectSuggestion={() =>
+              this.setState({ selectedSuggestion: index })
+            }
+            current={selected}
+            onClick={onClick}
+          />
+        </div>
+      );
     });
 
-    return <List display={focus} {...position}>{items}</List>;
+    return (
+      <List display={focus} {...position}>
+        {items}
+      </List>
+    );
   }
 
   /**
@@ -332,9 +358,9 @@ class Autocomplete extends Component {
       this.resetMatch();
       onChange(newEditorState);
       this.editor.focus();
-      return true
+      return true;
     }
-    return false
+    return false;
   }
 
   onFocus(e) {
@@ -359,14 +385,27 @@ class Autocomplete extends Component {
 
   onDownArrow(e) {
     const { focus, match, selectedSuggestion } = this.state;
-
     // Prevent default if match displayed
+    if (Object.keys(this.refs).length > selectedSuggestion + 1) {
+      this.refs[selectedSuggestion + 1].scrollIntoView({
+        block: "end",
+        behavior: "smooth"
+      });
+    } else {
+      this.setState({ selectedSuggestion: 0 }, () => {
+        this.refs[0].scrollIntoView({
+          block: "end",
+          behavior: "smooth"
+        });
+      });
+    }
     if (focus && match) {
-      const lastSuggestionIndex = match.suggestions.length > 0 ? match.suggestions.length - 1 : 0;
+      const lastSuggestionIndex =
+        match.suggestions.length > 0 ? match.suggestions.length - 1 : 0;
       e.preventDefault();
 
       // Update selectedSuggestion index
-      if (selectedSuggestion < (lastSuggestionIndex)) {
+      if (selectedSuggestion < lastSuggestionIndex) {
         this.setState({
           selectedSuggestion: selectedSuggestion + 1
         });
@@ -380,16 +419,27 @@ class Autocomplete extends Component {
 
   onUpArrow(e) {
     const { focus, match, selectedSuggestion } = this.state;
-
     // Prevent default if match displayed
     if (focus && match) {
       e.preventDefault();
-
+      
       // Update selectedSuggestion index
+      let totalSuggestions = Object.keys(this.refs).length
       if (selectedSuggestion > 0) {
+        this.refs[selectedSuggestion - 1].scrollIntoView({
+          block: "end",
+          behavior: "smooth"
+        });
         this.setState({
           selectedSuggestion: selectedSuggestion - 1
         });
+      } else {
+        this.setState({ selectedSuggestion: totalSuggestions - 1 }, () => {
+          this.refs[totalSuggestions - 1].scrollIntoView({
+            block: "end",
+            behavior: "smooth"
+          });
+        })
       }
     }
 
@@ -408,7 +458,7 @@ class Autocomplete extends Component {
       this.setState({
         match: null,
         selectedSuggestion: 0
-      })
+      });
     }
 
     if (this.props.onEscape) {
@@ -435,28 +485,26 @@ class Autocomplete extends Component {
     const { focus, match } = this.state;
 
     if (focus && match && match.suggestions.length > 0 && e.keyCode === 13) {
-      return 'add-entity';
+      return "add-entity";
     }
-
     return keyBindingFn ? keyBindingFn(e) : getDefaultKeyBinding(e);
   }
 
   handleKeyCommand(command) {
     const { handleKeyCommand } = this.props;
 
-    if (command === 'add-entity') {
+    if (command === "add-entity") {
       if (this.addEntityWithSelectedSuggestion()) {
-        return 'handled';
+        return "handled";
       }
     }
 
-    return handleKeyCommand ? handleKeyCommand(command) : 'not-handled';
+    return handleKeyCommand ? handleKeyCommand(command) : "not-handled";
   }
 
   render() {
     const childrenWithProps = this.getChildren();
     const suggestions = this.buildSuggestionsList();
-
     return (
       <React.Fragment>
         {childrenWithProps}
