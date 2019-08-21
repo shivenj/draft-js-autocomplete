@@ -28,7 +28,8 @@
   "peerDependencies": {
     "draft-js": "^0.10.1",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "react-dom": "^16.0.0",
+    "draft-js-multidecorators": "https://github.com/shivenj/draft-js-multidecorators"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
