@@ -7,7 +7,7 @@
   },
   "author": "Laurent Bello <bellolau@gmail.com>",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "files": [
     "dist/",
     "LICENSE.md"
