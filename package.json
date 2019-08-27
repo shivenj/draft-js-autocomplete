@@ -8,10 +8,6 @@
   "author": "Laurent Bello <bellolau@gmail.com>",
   "license": "MIT",
   "main": "src/index.js",
-  "files": [
-    "dist/",
-    "LICENSE.md"
-  ],
   "keywords": [
     "draftjs",
     "editor",
