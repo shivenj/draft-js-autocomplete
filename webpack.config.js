@@ -68,6 +68,12 @@ module.exports = {
       commonjs2: "draft-js",
       amd: "draft-js",
       root: "draft-js"
+    },
+    "draft-js-multidecorators": {
+      commonjs: "draft-js-multidecorators",
+      commonjs2: "draft-js-multidecorators",
+      amd: "draft-js-multidecorators",
+      root: "draft-js-multidecorators"
     }
   }
 };

@@ -18,7 +18,8 @@
     "start": "webpack --watch",
     "build": "webpack",
     "test": "jest --watch",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "prepublish": "rm -rf ./dist && npm run build"
   },
   "peerDependencies": {
     "draft-js": "^0.10.1",
